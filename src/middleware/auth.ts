@@ -8,13 +8,13 @@ const validateToken = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	if (!req.headers.access_token) {
+	if (!req.cookies.access_token) {
 		return res.status(403).json({
 			message: 'La peticion no tiene la cabecera de autentificacion',
 		})
 	}
 
-	const token = req.headers.access_token.toString().replace(/['"]+/g, '')
+	const token = req.cookies.access_token.toString().replace(/['"]+/g, '')
 
 	try {
 		const decode: any = jwt.verify(token, config.jwt_pass)

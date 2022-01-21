@@ -3,6 +3,7 @@ import './config/sql'
 import './config/mongodb'
 import { router } from './routes/routes'
 import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import morgan from 'morgan'
 import morganMiddleware from './middleware/morgan'
@@ -12,6 +13,7 @@ const server = new Server()
 
 server.app.use(bodyParser.urlencoded({ extended: false }))
 server.app.use(bodyParser.json())
+server.app.use(cookieParser())
 
 // Middleware
 server.app.use(cors())

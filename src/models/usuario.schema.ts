@@ -52,5 +52,5 @@ export interface IUsusarioSeccion {
 	seccionId: number
 	seccion?: string
 	empresaId: number
-	modulos?: IUsuarioModulo
+	modulos?: IUsuarioModulo[]
 }

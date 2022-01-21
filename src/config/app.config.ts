@@ -32,3 +32,9 @@ export interface IUser {
 	usuario: string
 	email: string
 }
+
+export const forEachAsync = async (array: Array<any>, callback: Function) => {
+	for (let i = 0; i < array.length; i++) {
+		await callback(array[i], i, array)
+	}
+}

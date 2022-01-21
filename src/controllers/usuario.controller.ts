@@ -7,7 +7,7 @@ import {
 	IUsusarioSeccion,
 } from '../models/usuario.schema'
 import { logger } from '../config/logger'
-import { config } from '../config/app.config'
+import { config, forEachAsync } from '../config/app.config'
 import { generatePass } from '../services/passwordGenerate'
 
 export const save = async (req: Request, res: Response) => {
@@ -552,7 +552,7 @@ export const getUserMenu = async (req: Request, res: Response) => {
 
 	let menu: IUsusarioSeccion[] = []
 
-	request.input('empresa', empresaId)
+	request.input('empresa', 7292)
 	request.input('user', user.id)
 
 	const query = `
@@ -563,6 +563,7 @@ export const getUserMenu = async (req: Request, res: Response) => {
 		from SECCION_USUARIO 
 		where idusuario = @user
 		and empresaId = @empresa
+		order by idseccion
 	`
 
 	try {
@@ -576,7 +577,7 @@ export const getUserMenu = async (req: Request, res: Response) => {
 			})
 		}
 
-		result.recordset.forEach(async (seccion) => {
+		await forEachAsync(result.recordset, async (seccion: IUsusarioSeccion) => {
 			const modulo = await request.input('seccion', seccion.seccionId).query(`
 				select m.idmodulo moduloId 
 					  ,m.nombre modulo
