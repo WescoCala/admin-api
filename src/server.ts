@@ -21,7 +21,7 @@ server.app.use(morgan('dev'))
 server.app.use(morganMiddleware)
 
 // Rutas
-server.app.use('/administrador', router)
+server.app.use('/api/administrador', router)
 
 server.start(() =>
 	logger.info(`Servidor corriendo en localhost:${server.port}`)
