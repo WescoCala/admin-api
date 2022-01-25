@@ -11,7 +11,7 @@ router.get(
 	UsuarioController.get
 )
 router.get(
-	'/usaurios',
+	'/usuarios',
 	[validateToken, requestConsume],
 	UsuarioController.getAll
 )
@@ -21,12 +21,12 @@ router.post(
 	UsuarioController.save
 )
 router.put(
-	'/usaurios',
+	'/usuarios',
 	[validateToken, requestConsume],
 	UsuarioController.update
 )
 router.get(
-	'/usaurio/modulo/:id',
+	'/usuario/modulo/:id',
 	[validateToken, requestConsume],
 	UsuarioController.getUserModule
 )
@@ -36,47 +36,47 @@ router.get(
 	UsuarioController.getUserMenu
 )
 router.post(
-	'/usaurio/modulo',
+	'/usuario/modulo',
 	[validateToken, requestConsume],
 	UsuarioController.addModulo
 )
 router.delete(
-	'/usaurio/modulo',
+	'/usuario/modulo',
 	[validateToken, requestConsume],
 	UsuarioController.removeModule
 )
 router.get(
-	'/usaurio/seccion',
+	'/usuario/seccion',
 	[validateToken, requestConsume],
 	UsuarioController.getUserSection
 )
 router.post(
-	'/usaurio/seccion',
+	'/usuario/seccion',
 	[validateToken, requestConsume],
 	UsuarioController.addSection
 )
 router.delete(
-	'/usaurio/seccion',
+	'/usuario/seccion',
 	[validateToken, requestConsume],
 	UsuarioController.removeSection
 )
 router.get(
-	'/usaurio/empresa',
+	'/usuario/empresa',
 	[validateToken, requestConsume],
 	UsuarioController.getUserEmpresa
 )
 router.get(
-	'/usaurio/empresa/:id',
+	'/usuario/empresa/:id',
 	[validateToken, requestConsume],
 	UsuarioController.getUserEmpresa
 )
 router.post(
-	'/usaurio/empresa',
+	'/usuario/empresa',
 	[validateToken, requestConsume],
 	UsuarioController.addEmpresa
 )
 router.delete(
-	'/usaurio/empresa',
+	'/usuario/empresa',
 	[validateToken, requestConsume],
 	UsuarioController.removeEmpresa
 )
