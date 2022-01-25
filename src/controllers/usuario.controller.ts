@@ -557,7 +557,7 @@ export const getUserMenu = async (req: Request, res: Response) => {
 
 	const query = `
 		select idseccion seccionId
-			,dbo.getSeccionName(idseccion) seccion
+			,dbo.getSeccionName(idseccion) [name]
 			,idusuario _id
 			,empresaId 
 		from SECCION_USUARIO 
@@ -579,13 +579,15 @@ export const getUserMenu = async (req: Request, res: Response) => {
 
 		await forEachAsync(result.recordset, async (seccion: IUsusarioSeccion) => {
 			const modulo = await request.input('seccion', seccion.seccionId).query(`
-				select m.idmodulo moduloId 
-					  ,m.nombre modulo
+				select m.idmodulo _id 
+					  ,m.nombre [name]
 					  ,m.url
 					  ,m.icono icon
 					  ,dbo.getFamilia(m.idfamilia) familia
 					  ,mu.vista [view]
+					  ,params
 					  ,mu.empresaId empresaId
+					  ,m.vista vision
 				from MODULOS m
 					left join MODULO_USUARIO mu on mu.idmodulo = m.idmodulo
 				where mu.idusuario = @user and mu.empresaId = @empresa and idseccion = @seccion

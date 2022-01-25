@@ -31,11 +31,12 @@ export interface IUsuario {
 export interface IUsuarioModulo {
 	_id?: number
 	moduloId: number
-	modulo?: string
+	name?: string
 	url?: string
 	icon?: string
 	familia?: string
 	view: number
+	params?: string
 	empresaId: number
 	vision?: boolean
 }
@@ -50,7 +51,7 @@ export interface IUsuarioEmpresa {
 export interface IUsusarioSeccion {
 	_id: number
 	seccionId: number
-	seccion?: string
+	name?: string
 	empresaId: number
 	modulos?: IUsuarioModulo[]
 }
