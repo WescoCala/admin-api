@@ -91,12 +91,12 @@ export const save = async (req: Request, res: Response) => {
 		`
 
 		try {
-			const usaurio = await request.query(query)
+			const usuario = await request.query(query)
 
 			return res.status(201).json({
 				message: 'Datos ingresados con exito',
-				counts: usaurio.rowsAffected[0],
-				data: usaurio.recordset[0],
+				counts: usuario.rowsAffected[0],
+				data: usuario.recordset[0],
 			})
 		} catch (error) {
 			logger.error(error)

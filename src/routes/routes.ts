@@ -9,6 +9,7 @@ import { router as Empresas } from './empresas.routes'
 import { router as Cargos } from './cargo.routes'
 import { router as Areas } from './area.routes'
 import { router as Estados } from './estados.routes'
+import { router as Tipos } from './tipo.routes'
 
 router.use(Usuarios)
 router.use(Secciones)
@@ -17,3 +18,4 @@ router.use(Empresas)
 router.use(Cargos)
 router.use(Areas)
 router.use(Estados)
+router.use(Tipos)

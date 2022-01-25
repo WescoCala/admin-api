@@ -207,7 +207,9 @@ export const remove = async (req: Request, res: Response) => {
 
 	request.input('id', params.id)
 
-	const query = ``
+	const query = `
+		delete from area where idarea = @id
+	`
 
 	try {
 		const result = await request.query(query)
