@@ -22,7 +22,7 @@ export const logger = createLogger({
 		format.json(),
 		format.metadata()
 	),
-	defaultMeta: { service: 'Api Abastecimiento' },
+	defaultMeta: { service: 'Api Administrador' },
 	transports: [
 		new transports.Console({
 			format: combine(format.simple(), format.colorize(), logFormat),
