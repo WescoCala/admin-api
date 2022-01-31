@@ -8,8 +8,8 @@ export const config = {
 		server: process.env.MONGO_CNN || 'mongodb://localhost:27017/',
 		db: process.env.MONGO_DB || 'adinet',
 		auth: {
-			user: '',
-			pass: '',
+			user: process.env.MONGO_USER || '',
+			pass: process.env.MONGO_PASS || '',
 		},
 	},
 	sqlsrv: {

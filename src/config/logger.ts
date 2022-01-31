@@ -29,7 +29,7 @@ export const logger = createLogger({
 		}),
 		new transports.MongoDB({
 			level: 'http',
-			db: `${config.mongodb.server}${config.mongodb.db}`,
+			db: config.mongodb.server,
 			options: {
 				useUnifiedTopology: true,
 			},
