@@ -78,7 +78,7 @@ class TipoPropuesta {
 			const result = await request.query(query)
 
 			if (result.recordset.length === 0) {
-				return res.status(404).json({
+				return res.status(204).json({
 					message: 'No se encontraron los datos solicitados',
 					counts: 0,
 					data: [],
@@ -127,7 +127,7 @@ class TipoPropuesta {
 			const result = await request.query(query)
 
 			if (result.recordset.length === 0) {
-				return res.status(404).json({
+				return res.status(204).json({
 					message: 'No se encontraron los datos solicitados',
 					counts: 0,
 					data: [],

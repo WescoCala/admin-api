@@ -153,7 +153,7 @@ export const get = async (req: Request, res: Response) => {
 		const result = await request.query(query)
 
 		if (result.recordset.length === 0) {
-			return res.status(404).json({
+			return res.status(204).json({
 				message: 'No se encontraron los datos solicitados',
 				counts: 0,
 				data: [],
@@ -215,7 +215,7 @@ export const getAll = async (req: Request, res: Response) => {
 		const result = await request.query(query)
 
 		if (result.recordset.length === 0) {
-			return res.status(404).json({
+			return res.status(204).json({
 				message: 'No se encontraron los datos solicitados',
 				counts: 0,
 				data: params,
@@ -427,7 +427,7 @@ export const getUserModule = async (req: Request, res: Response) => {
 		const result = await request.query(query)
 
 		if (result.recordset.length === 0) {
-			return res.status(404).json({
+			return res.status(204).json({
 				message: 'No se encontraron los datos solicitados',
 				counts: 0,
 				data: [],
@@ -445,191 +445,6 @@ export const getUserModule = async (req: Request, res: Response) => {
 			message: 'Error al ejecutar la query',
 			counts: 0,
 			data: [],
-			error,
-		})
-	}
-}
-
-export const addSection = async (req: Request, res: Response) => {
-	const request = new sql.Request()
-	const params: IUsusarioSeccion = req.body
-	const user: any = req.headers['user']
-	const empresaId = req.headers['empresa']
-
-	request.input('empresa', empresaId)
-	request.input('seccion', params.seccionId)
-	request.input('user', params._id)
-	request.input('created', config.date)
-	request.input('createdBy', user.id)
-
-	const query = `
-		INSERT INTO SECCION_USUARIO 
-		(
-			idseccion,
-			idusuario,
-			empresaId,
-			created,
-			createdBy
-		) VALUES (
-			@seccion
-			,@user
-			,@empresa
-			,@created
-			,@createdBy
-		)
-	`
-
-	try {
-		const seccionUsuario = await request.query(query)
-
-		return res.status(201).json({
-			message: 'Datos ingresados con exito',
-			counts: seccionUsuario.rowsAffected[0],
-			data: seccionUsuario.recordset[0],
-		})
-	} catch (error) {
-		logger.error(error)
-		return res.status(500).json({
-			message: 'Error al ingresar los datos',
-			counts: 0,
-			data: params,
-			error,
-		})
-	}
-}
-
-export const getUserSection = async (req: Request, res: Response) => {
-	const request = new sql.Request()
-	const id = req.params.id
-	const empresaId = req.headers['empresa']
-
-	request.input('id', id)
-	request.input('empresa', empresaId)
-
-	const query = `
-		select idseccion seccionId
-			,dbo.getSeccionName(idseccion) seccion
-			,idusuario _id
-			,empresaId 
-		from SECCION_USUARIO 
-		where idusuario = @id
-		and empresaId = @empresa
-	`
-	try {
-		const result = await request.query(query)
-
-		if (result.recordset.length === 0) {
-			return res.status(404).json({
-				message: 'No se encontraron los datos solicitados',
-				counts: 0,
-				data: [],
-			})
-		}
-
-		return res.status(200).json({
-			message: 'Datos encontrados con exito',
-			counts: result.recordset.length,
-			data: result.recordset,
-		})
-	} catch (error) {
-		logger.error(error)
-		return res.status(500).json({
-			message: 'Error al ejecutar la query',
-			counts: 0,
-			data: {
-				id,
-			},
-			error,
-		})
-	}
-}
-
-export const getUserMenu = async (req: Request, res: Response) => {
-	const request = new sql.Request()
-	const params = req.body
-	const user: any = req.headers['user']
-	const empresaId = req.headers['empresa']
-
-	let menu: IUsusarioSeccion[] = []
-
-	request.input('empresa', 7292)
-	request.input('user', user.id)
-
-	const query = `
-		select idseccion seccionId
-			,dbo.getSeccionName(idseccion) [name]
-			,idusuario _id
-			,empresaId 
-		from SECCION_USUARIO 
-		where idusuario = @user
-		and empresaId = @empresa
-		order by idseccion
-	`
-
-	try {
-		const result = await request.query(query)
-
-		if (result.recordset.length === 0) {
-			return res.status(404).json({
-				message: 'No se encontraron los datos solicitados',
-				counts: 0,
-				data: [],
-			})
-		}
-
-		await forEachAsync(result.recordset, async (seccion: IUsusarioSeccion) => {
-			const modulo = await request.input('seccion', seccion.seccionId).query(`
-				select m.idmodulo _id 
-					  ,m.nombre [name]
-					  ,m.url
-					  ,m.icono icon
-					  ,dbo.getFamilia(m.idfamilia) familia
-					  ,mu.vista [view]
-					  ,params
-					  ,mu.empresaId empresaId
-					  ,m.vista vision
-				from MODULOS m
-					left join MODULO_USUARIO mu on mu.idmodulo = m.idmodulo
-				where mu.idusuario = @user and mu.empresaId = @empresa and idseccion = @seccion
-				`)
-
-			menu.push({
-				...seccion,
-				modulos: modulo.recordset,
-			})
-		})
-
-		return res.status(200).json({
-			message: 'Datos encontrados con exito',
-			counts: result.recordset.length,
-			data: menu,
-		})
-	} catch (error) {
-		logger.error(error)
-		return res.status(500).json({
-			message: 'Error al ejecutar la query',
-			counts: 0,
-			data: params,
-			error,
-		})
-	}
-}
-
-export const removeSection = async (req: Request, res: Response) => {
-	const request = new sql.Request()
-	const params = req.body
-	const user = req.headers['user']
-	const empresaId = req.headers['empresa']
-
-	const query = ``
-
-	try {
-	} catch (error) {
-		logger.error(error)
-		return res.status(500).json({
-			message: 'Error al ingresar los datos',
-			counts: 0,
-			data: params,
 			error,
 		})
 	}
@@ -726,6 +541,306 @@ export const removeModule = async (req: Request, res: Response) => {
 	}
 }
 
+export const getModulo = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params: any = req.params
+	const user: any = req.headers['user']
+	const empresaId = req.headers['empresa']
+
+	request.input('modulo', params.modulo)
+	request.input('empresa', empresaId)
+	request.input('user', user.id)
+
+	// const query = `
+	// 	select m.idmodulo _id
+	// 		,m.nombre [name]
+	// 		,m.url
+	// 		,m.icono icon
+	// 		,dbo.getFamilia(m.idfamilia) familia
+	// 		,mu.vista [view]
+	// 		,params
+	// 		,mu.empresaId empresaId
+	// 		,m.vista vision
+	// 	from MODULOS m
+	// 	left join MODULO_USUARIO mu on mu.idmodulo = m.idmodulo
+	// 	where mu.idusuario = @user and mu.empresaId = @empresa and m.nombre = @modulo
+	// `
+
+	const query = `
+		select
+			mu.idmodulo,
+			mu.idusuario,
+			mu.vista
+		from
+			MODULO_USUARIO mu
+			LEFT JOIN MODULOS m on m.idmodulo = mu.idmodulo
+		where mu.idusuario = @user
+			and m.nombre = @modulo
+			and mu.empresaId = @empresa
+	`
+
+	try {
+		const result = await request.query(query)
+
+		if (result.rowsAffected[0] === 0) {
+			return res.status(204).json({
+				message: 'No se encontraron los datos solicitados',
+				counts: 0,
+				data: params,
+			})
+		}
+
+		return res.status(200).json({
+			message: 'Datos encontrados con exito',
+			counts: result.rowsAffected[0],
+			data: result.recordset[0],
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al ingresar los datos',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
+
+export const getUsuariosPermiso = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params: any = req.params
+	const user: any = req.headers['user']
+	const empresaId = req.headers['empresa']
+
+	request.input('modulo', params.modulo)
+	request.input('empresa', empresaId)
+
+	const query = `
+		select u.idusuario userId,
+			u.nombre + ' ' + u.ap_p userName,
+			u.img userImg
+		from
+			MODULO_USUARIO mu
+			LEFT JOIN MODULOS m on m.idmodulo = mu.idmodulo
+			LEFT JOIN USUARIO u on u.idusuario = mu.idusuario
+		where 
+		m.nombre = @modulo
+		and u.estado = 1
+		and mu.empresaId = @empresa
+	`
+
+	try {
+		const result = await request.query(query)
+
+		if (result.rowsAffected[0] === 0) {
+			return res.status(204).json({
+				message: 'No se encontraron los datos solicitados',
+				counts: 0,
+				data: params,
+			})
+		}
+
+		return res.status(200).json({
+			message: 'Datos encontrados con exito',
+			counts: result.rowsAffected[0],
+			data: result.recordset,
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al ingresar los datos',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
+
+export const addSection = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params: IUsusarioSeccion = req.body
+	const user: any = req.headers['user']
+	const empresaId = req.headers['empresa']
+
+	request.input('empresa', empresaId)
+	request.input('seccion', params.seccionId)
+	request.input('user', params._id)
+	request.input('created', config.date)
+	request.input('createdBy', user.id)
+
+	const query = `
+	INSERT INTO SECCION_USUARIO 
+	(
+			idseccion,
+			idusuario,
+			empresaId,
+			created,
+			createdBy
+			) VALUES (
+				@seccion
+				,@user
+			,@empresa
+			,@created
+			,@createdBy
+			)
+			`
+
+	try {
+		const seccionUsuario = await request.query(query)
+
+		return res.status(201).json({
+			message: 'Datos ingresados con exito',
+			counts: seccionUsuario.rowsAffected[0],
+			data: seccionUsuario.recordset[0],
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al ingresar los datos',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
+
+export const getUserSection = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const id = req.params.id
+	const empresaId = req.headers['empresa']
+
+	request.input('id', id)
+	request.input('empresa', empresaId)
+
+	const query = `
+		select idseccion seccionId
+			,dbo.getSeccionName(idseccion) seccion
+			,idusuario _id
+			,empresaId 
+		from SECCION_USUARIO 
+		where idusuario = @id
+		and empresaId = @empresa
+	`
+	try {
+		const result = await request.query(query)
+
+		if (result.recordset.length === 0) {
+			return res.status(204).json({
+				message: 'No se encontraron los datos solicitados',
+				counts: 0,
+				data: [],
+			})
+		}
+
+		return res.status(200).json({
+			message: 'Datos encontrados con exito',
+			counts: result.recordset.length,
+			data: result.recordset,
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al ejecutar la query',
+			counts: 0,
+			data: {
+				id,
+			},
+			error,
+		})
+	}
+}
+
+export const getUserMenu = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params = req.body
+	const user: any = req.headers['user']
+	const empresaId = req.headers['empresa']
+
+	let menu: IUsusarioSeccion[] = []
+
+	request.input('empresa', empresaId)
+	request.input('user', user.id)
+
+	const query = `
+		select idseccion seccionId
+			,dbo.getSeccionName(idseccion) [name]
+			,idusuario _id
+			,empresaId 
+		from SECCION_USUARIO 
+		where idusuario = @user
+		and empresaId = @empresa
+		order by idseccion
+	`
+
+	try {
+		const result = await request.query(query)
+
+		if (result.recordset.length === 0) {
+			return res.status(204).json({
+				message: 'No se encontraron los datos solicitados',
+				counts: 0,
+				data: [],
+			})
+		}
+
+		await forEachAsync(result.recordset, async (seccion: IUsusarioSeccion) => {
+			const modulo = await request.input('seccion', seccion.seccionId).query(`
+				select m.idmodulo _id 
+					  ,m.nombre [name]
+					  ,m.url
+					  ,m.icono icon
+					  ,dbo.getFamilia(m.idfamilia) familia
+					  ,mu.vista [view]
+					  ,params
+					  ,mu.empresaId empresaId
+					  ,m.vista vision
+				from MODULOS m
+					left join MODULO_USUARIO mu on mu.idmodulo = m.idmodulo
+				where mu.idusuario = @user and mu.empresaId = @empresa and idseccion = @seccion
+				`)
+
+			menu.push({
+				...seccion,
+				modulos: modulo.recordset,
+			})
+		})
+
+		return res.status(200).json({
+			message: 'Datos encontrados con exito',
+			counts: result.recordset.length,
+			data: menu,
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al ejecutar la query',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
+
+export const removeSection = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params = req.body
+	const user = req.headers['user']
+	const empresaId = req.headers['empresa']
+
+	const query = ``
+
+	try {
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al ingresar los datos',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
+
 export const addEmpresa = async (req: Request, res: Response) => {
 	const request = new sql.Request()
 	const params: IUsuarioEmpresa = req.body
@@ -793,7 +908,7 @@ export const getUserEmpresa = async (req: Request, res: Response) => {
 		const result = await request.query(query)
 
 		if (result.recordset.length === 0) {
-			return res.status(404).json({
+			return res.status(204).json({
 				message: 'No se encontraron los datos solicitados',
 				counts: 0,
 				data: [],
@@ -851,6 +966,54 @@ export const removeEmpresa = async (req: Request, res: Response) => {
 		logger.error(error)
 		return res.status(500).json({
 			message: 'Error al eliminar los datos',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
+
+export const getUsuariosAreas = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params: any = req.params
+	const empresaId = req.headers['empresa']
+
+	request.input('empresa', empresaId)
+	request.input('id', params.id)
+
+	const query = `
+		select u.idusuario userId,
+			(u.nombre + ' ' + u.ap_p) userName, 
+			u.img userImg, 
+			a.sla, 
+			u.idarea areaId
+		from USUARIO u 
+		left join AREA a on a.idarea = u.idarea 
+		where u.idarea = @id
+		and u.estado = 1
+        and empresaId = @empresa
+    `
+
+	try {
+		const result = await request.query(query)
+
+		if (result.recordset.length === 0) {
+			return res.status(204).json({
+				message: 'No se encontraron los datos solicitados',
+				counts: 0,
+				data: [],
+			})
+		}
+
+		return res.status(200).json({
+			message: 'Datos encontrados con exito',
+			counts: result.recordset.length,
+			data: result.recordset,
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al consultar los datos',
 			counts: 0,
 			data: params,
 			error,

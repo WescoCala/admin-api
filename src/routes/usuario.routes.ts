@@ -46,6 +46,16 @@ router.delete(
 	UsuarioController.removeModule
 )
 router.get(
+	'/usuario/permiso/:modulo',
+	[validateToken, requestConsume],
+	UsuarioController.getModulo
+)
+router.get(
+	'/usuario/permisos/:modulo',
+	[validateToken, requestConsume],
+	UsuarioController.getUsuariosPermiso
+)
+router.get(
 	'/usuario/seccion',
 	[validateToken, requestConsume],
 	UsuarioController.getUserSection
@@ -79,4 +89,9 @@ router.delete(
 	'/usuario/empresa',
 	[validateToken, requestConsume],
 	UsuarioController.removeEmpresa
+)
+router.get(
+	'/personal/:id',
+	[validateToken, requestConsume],
+	UsuarioController.getUsuariosAreas
 )
