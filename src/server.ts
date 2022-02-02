@@ -13,6 +13,7 @@ const server = new Server()
 
 const corsOption = {
 	origin: ['https://adinet.eecol.cl:89', 'http://adinet.wescocala.com'],
+	Credential: true,
 }
 
 server.app.use(bodyParser.urlencoded({ extended: false }))
@@ -20,7 +21,7 @@ server.app.use(bodyParser.json())
 server.app.use(cookieParser())
 
 // Middleware
-server.app.use(cors())
+server.app.use(cors(corsOption))
 server.app.use(morgan('dev'))
 server.app.use(morganMiddleware)
 
