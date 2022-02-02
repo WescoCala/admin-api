@@ -20,7 +20,7 @@ server.app.use(bodyParser.json())
 server.app.use(cookieParser())
 
 // Middleware
-server.app.use(cors(corsOption))
+server.app.use(cors())
 server.app.use(morgan('dev'))
 server.app.use(morganMiddleware)
 
