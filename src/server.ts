@@ -13,7 +13,7 @@ const server = new Server()
 
 const corsOption = {
 	origin: ['https://adinet.eecol.cl:89', 'http://adinet.wescocala.com'],
-	Credential: true,
+	credentials: true,
 }
 
 server.app.use(bodyParser.urlencoded({ extended: false }))
