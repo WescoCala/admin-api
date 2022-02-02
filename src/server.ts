@@ -12,7 +12,7 @@ import { logger } from './config/logger'
 const server = new Server()
 
 const corsOption = {
-	origin: ['https://adinet.eecol.cl', 'https://adinet.wescocala.com'],
+	origin: ['https://adinet.eecol.cl:89', 'https://adinet.wescocala.com'],
 }
 
 server.app.use(bodyParser.urlencoded({ extended: false }))
