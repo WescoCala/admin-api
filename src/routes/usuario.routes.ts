@@ -56,7 +56,7 @@ router.get(
 	UsuarioController.getUsuariosPermiso
 )
 router.get(
-	'/usuario/seccion',
+	'/usuario/seccion/:id',
 	[validateToken, requestConsume],
 	UsuarioController.getUserSection
 )

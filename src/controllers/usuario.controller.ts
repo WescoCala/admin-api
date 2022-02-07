@@ -14,6 +14,7 @@ export const save = async (req: Request, res: Response) => {
 	const request = new sql.Request()
 	const params: IUsuario = req.body
 	const user: any = req.headers['user']
+	const empresaId = req.headers['empresa']
 
 	if (
 		params.nombre &&
@@ -46,8 +47,11 @@ export const save = async (req: Request, res: Response) => {
 		request.input('fono', params.phone)
 		request.input('created', config.date)
 		request.input('createdBy', user.id)
+		request.input('createdBy', user.id)
 
 		const query = `
+			declare @id int = 0
+
 			insert into usuario 
 			(
 				nombre,
@@ -68,7 +72,9 @@ export const save = async (req: Request, res: Response) => {
 				fono,
 				created,
 				createdby,
-			) values (
+			) 
+			output @id = inserted.idusuario
+			values (
 				@nombre, 
 				@ap_p, 
 				@ap_m, 
@@ -87,6 +93,19 @@ export const save = async (req: Request, res: Response) => {
 				@fono,
 				@created,
 				@createdBy
+			)
+
+			insert into USUARIO_EMPRESA 
+			( 
+				usuarioId
+				,empresaId
+				,created
+				,createdBy
+			) values (
+				@id
+				,@empresa
+				,@created
+				,@createdBy
 			)
 		`
 
@@ -124,11 +143,13 @@ export const get = async (req: Request, res: Response) => {
 
 	const query = `
         select 
-			isusuario _id
+			idusuario id
 			,nombre
 			,ap_p apellidoPaterno
 			,ap_m apellidoMaterno
-			,dbo.getUserName(idusaurio) displayName
+			,dbo.getUserName(idusuario) displayName
+			,usuario
+			,img
 			,email
 			,idsucursal sucursalId
 			,dbo.getSucursal(idsucursal) sucursal
@@ -185,11 +206,13 @@ export const getAll = async (req: Request, res: Response) => {
 
 	const query = `
 		select 
-			isusuario _id
+			idusuario id
 			,nombre
 			,ap_p apellidoPaterno
 			,ap_m apellidoMaterno
-			,dbo.getUserName(idusaurio) displayName
+			,dbo.getUserName(idusuario) displayName
+			,usuario
+			,img
 			,email
 			,idsucursal sucursalId
 			,dbo.getSucursal(idsucursal) sucursal
@@ -197,18 +220,14 @@ export const getAll = async (req: Request, res: Response) => {
 			,dbo.getArea(idarea) area
 			,idcargo cargoId
 			,dbo.getCargo(idcargo) cargo
-            ,created
-            ,createdBy
+			,created
+			,createdBy
 			,dbo.getUserName(createdBy) createdByName
-            ,updated
-            ,updatedBy
+			,updated
+			,updatedBy
 			,dbo.getUserName(updatedBy) updatedByName
 		from
 			USUARIO
-		where 
-			idusuario in (
-				select usuarioId from USUARIO_EMPRESA where empresaId = @empresa
-			) 
     `
 
 	try {
@@ -389,7 +408,7 @@ export const addModulo = async (req: Request, res: Response) => {
 		return res.status(201).json({
 			message: 'Datos ingresados con exito',
 			counts: moduloUsuario.rowsAffected[0],
-			data: moduloUsuario.recordset[0],
+			data: moduloUsuario.recordset,
 		})
 	} catch (error) {
 		logger.error(error)
@@ -412,11 +431,13 @@ export const getUserModule = async (req: Request, res: Response) => {
 
 	const query = `
 		select m.idmodulo moduloId 
-			, m.nombre modulo
+			, m.nombre [name]
+			, m.descripcion [description]
 			, m.url
 			, m.icono icon
 			, dbo.getFamilia(m.idfamilia) familia
-			, mu.vista [view]
+			, isnull(mu.vista, 1) [view]
+			, mu.idusuario _id
 			, mu.empresaId empresaId
 		from MODULOS m
 		left join MODULO_USUARIO mu on mu.idmodulo = m.idmodulo
@@ -503,15 +524,20 @@ export const updateModule = async (req: Request, res: Response) => {
 
 export const removeModule = async (req: Request, res: Response) => {
 	const request = new sql.Request()
-	const params = req.body
+	const params = req.query
 	const user: any = req.headers['user']
 	const empresaId = req.headers['empresa']
 
 	request.input('empresa', empresaId)
-	request.input('id', user.id)
+	request.input('id', params.userId)
+	request.input('modulo', params.moduloId)
 
 	const query = `
-		delete from MODULO_USUARIO where idusuario = @id and empresaId = @empresa
+		delete from MODULO_USUARIO 
+		where 
+		idusuario = @id 
+		and empresaId = @empresa 
+		and idmodulo = @modulo
 	`
 
 	try {
@@ -671,19 +697,19 @@ export const addSection = async (req: Request, res: Response) => {
 	const query = `
 	INSERT INTO SECCION_USUARIO 
 	(
-			idseccion,
-			idusuario,
-			empresaId,
-			created,
-			createdBy
-			) VALUES (
-				@seccion
-				,@user
-			,@empresa
-			,@created
-			,@createdBy
-			)
-			`
+		idseccion,
+		idusuario,
+		empresaId,
+		created,
+		createdBy
+	) VALUES (
+		@seccion
+		,@user
+		,@empresa
+		,@created
+		,@createdBy
+	)
+	`
 
 	try {
 		const seccionUsuario = await request.query(query)
@@ -691,7 +717,7 @@ export const addSection = async (req: Request, res: Response) => {
 		return res.status(201).json({
 			message: 'Datos ingresados con exito',
 			counts: seccionUsuario.rowsAffected[0],
-			data: seccionUsuario.recordset[0],
+			data: seccionUsuario.recordset,
 		})
 	} catch (error) {
 		logger.error(error)
@@ -713,13 +739,14 @@ export const getUserSection = async (req: Request, res: Response) => {
 	request.input('empresa', empresaId)
 
 	const query = `
-		select idseccion seccionId
-			,dbo.getSeccionName(idseccion) seccion
-			,idusuario _id
-			,empresaId 
-		from SECCION_USUARIO 
-		where idusuario = @id
-		and empresaId = @empresa
+		SELECT s.idseccion seccionId, 
+			s.nombre [name],
+			u.idusuario _id
+			,empresaId
+		FROM SECCION s
+		left join  SECCION_USUARIO u on u.idseccion = s.idseccion 
+			and u.idusuario = @id 
+			and u.empresaId = @empresa
 	`
 	try {
 		const result = await request.query(query)
@@ -823,13 +850,37 @@ export const getUserMenu = async (req: Request, res: Response) => {
 
 export const removeSection = async (req: Request, res: Response) => {
 	const request = new sql.Request()
-	const params = req.body
+	const params = req.query
 	const user = req.headers['user']
 	const empresaId = req.headers['empresa']
 
-	const query = ``
+	request.input('user', params.userId)
+	request.input('seccion', params.seccionId)
+	request.input('empresa', empresaId)
+
+	const query = `
+		DELETE FROM SECCION_USUARIO 
+		where idusuario = @user 
+			and idseccion = @seccion
+			and empresaId = @empresa
+	`
 
 	try {
+		const result = await request.query(query)
+
+		if (result.rowsAffected[0] === 0) {
+			return res.status(204).json({
+				message: 'Sin datos que eliminar',
+				counts: 0,
+				data: params,
+			})
+		}
+
+		return res.status(200).json({
+			message: 'Datos eliminados con exito',
+			counts: result.rowsAffected[0],
+			data: [],
+		})
 	} catch (error) {
 		logger.error(error)
 		return res.status(500).json({

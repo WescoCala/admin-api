@@ -32,6 +32,7 @@ export interface IUsuarioModulo {
 	_id?: number
 	moduloId: number
 	name?: string
+	description?: string
 	url?: string
 	icon?: string
 	familia?: string
