@@ -151,6 +151,7 @@ export const get = async (req: Request, res: Response) => {
 			,usuario
 			,img
 			,email
+			,admin
 			,idsucursal sucursalId
 			,dbo.getSucursal(idsucursal) sucursal
 			,idarea areaId
@@ -214,6 +215,7 @@ export const getAll = async (req: Request, res: Response) => {
 			,usuario
 			,img
 			,email
+			,admin
 			,idsucursal sucursalId
 			,dbo.getSucursal(idsucursal) sucursal
 			,idarea areaId
