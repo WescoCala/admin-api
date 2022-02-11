@@ -1,5 +1,5 @@
 export interface IUsuario {
-	_id?: number
+	id?: number
 	nombre: string
 	apellidoPaterno: string
 	apellidoMaterno?: string

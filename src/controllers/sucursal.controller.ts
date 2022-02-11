@@ -99,9 +99,6 @@ export const get = async (req: Request, res: Response) => {
 export const getAll = async (req: Request, res: Response) => {
 	const request = new sql.Request()
 	const params = req.body
-	const empresaId = req.headers['empresa']
-
-	request.input('empresa', empresaId)
 
 	const query = `
         SELECT idsucursal _id
@@ -114,7 +111,6 @@ export const getAll = async (req: Request, res: Response) => {
             ,updatedBy
             ,dbo.getUserName(updatedBy) updatedByName
         FROM SUCURSAL
-        where empresaId = @empresa
 	`
 
 	try {

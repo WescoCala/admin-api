@@ -121,7 +121,6 @@ export const getAll = async (req: Request, res: Response) => {
             ,updatedBy
             ,dbo.getUserName(updatedBy) updatedByName
         from CARGO
-        where empresaId = @empresa
     `
 
 	try {

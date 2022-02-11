@@ -34,24 +34,21 @@ export const save = async (req: Request, res: Response) => {
 		request.input('ap_m', params.apellidoMaterno)
 		request.input('email', params.email)
 		request.input('img', params.img)
-		request.input('sexo', sql.TinyInt, params.sexo)
+		request.input('sexo', params.sexo)
 		request.input('usuario', params.usuario)
 		request.input('payroll', params.payroll)
 		request.input('area', params.areaId)
-		request.input('admin', sql.TinyInt, 0)
+		request.input('admin', 0)
 		request.input('cargo', params.cargoId)
 		request.input('estado', 1)
 		request.input('sucursal', params.sucursalId)
 		request.input('jefe', params.jefe)
 		request.input('pass', generatePass(params.password))
-		request.input('fono', params.phone)
+		request.input('fono', params.phone ? params.phone : null)
 		request.input('created', config.date)
-		request.input('createdBy', user.id)
 		request.input('createdBy', user.id)
 
 		const query = `
-			declare @id int = 0
-
 			insert into usuario 
 			(
 				nombre,
@@ -59,21 +56,20 @@ export const save = async (req: Request, res: Response) => {
 				ap_m,
 				email,
 				pass,
-				sexo,
 				img,
-				usaurio,
+				sexo,
+				usuario,
 				payroll,
-				area,
 				admin,
-				cargo,
+				idcargo,
+				idarea,
+				idsucursal,
 				estado,
-				sucursal,
 				jefe,
 				fono,
 				created,
-				createdby,
+				createdby
 			) 
-			output @id = inserted.idusuario
 			values (
 				@nombre, 
 				@ap_p, 
@@ -84,28 +80,15 @@ export const save = async (req: Request, res: Response) => {
 				@sexo, 
 				@usuario, 
 				@payroll, 
-				@area, 
 				@admin, 
 				@cargo, 
-				@estado, 
+				@area, 
 				@sucursal, 
+				@estado, 
 				@jefe,
 				@fono,
 				@created,
 				@createdBy
-			)
-
-			insert into USUARIO_EMPRESA 
-			( 
-				usuarioId
-				,empresaId
-				,created
-				,createdBy
-			) values (
-				@id
-				,@empresa
-				,@created
-				,@createdBy
 			)
 		`
 
@@ -115,7 +98,7 @@ export const save = async (req: Request, res: Response) => {
 			return res.status(201).json({
 				message: 'Datos ingresados con exito',
 				counts: usuario.rowsAffected[0],
-				data: usuario.recordset[0],
+				data: usuario.recordset,
 			})
 		} catch (error) {
 			logger.error(error)
@@ -152,6 +135,11 @@ export const get = async (req: Request, res: Response) => {
 			,img
 			,email
 			,admin
+			,estado
+			,sexo
+			,jefe
+			,fono phone
+			,payroll
 			,idsucursal sucursalId
 			,dbo.getSucursal(idsucursal) sucursal
 			,idarea areaId
@@ -216,6 +204,11 @@ export const getAll = async (req: Request, res: Response) => {
 			,img
 			,email
 			,admin
+			,estado
+			,sexo
+			,jefe
+			,fono phone
+			,payroll
 			,idsucursal sucursalId
 			,dbo.getSucursal(idsucursal) sucursal
 			,idarea areaId
@@ -264,7 +257,7 @@ export const update = async (req: Request, res: Response) => {
 	const params: IUsuario = req.body
 	const user: any = req.headers['user']
 
-	request.input('id', params._id)
+	request.input('id', params.id)
 	request.input('nombre', params.nombre)
 	request.input('ap_p', params.apellidoPaterno)
 	request.input('ap_m', params.apellidoMaterno)
@@ -274,9 +267,9 @@ export const update = async (req: Request, res: Response) => {
 	request.input('usuario', params.usuario)
 	request.input('payroll', params.payroll)
 	request.input('area', params.areaId)
-	request.input('admin', sql.TinyInt, 0)
+	request.input('admin', params.admin)
 	request.input('cargo', params.cargoId)
-	request.input('estado', 1)
+	request.input('estado', params.estado)
 	request.input('sucursal', params.sucursalId)
 	request.input('jefe', params.jefe)
 	request.input('fono', params.phone)
@@ -297,6 +290,7 @@ export const update = async (req: Request, res: Response) => {
 			idcargo = @cargo,
 			idsucursal = @sucursal,
 			jefe = @jefe,
+			fono = @fono,
 			estado = @estado,
 			admin = @admin,
 			updated = @updated,
@@ -925,7 +919,7 @@ export const addEmpresa = async (req: Request, res: Response) => {
 		return res.status(201).json({
 			message: 'Datos ingresados con exito',
 			counts: moduloUsuario.rowsAffected[0],
-			data: moduloUsuario.recordset[0],
+			data: moduloUsuario.recordset,
 		})
 	} catch (error) {
 		logger.error(error)
@@ -947,7 +941,8 @@ export const getUserEmpresa = async (req: Request, res: Response) => {
 	request.input('id', id)
 
 	const query = `
-		select e._id empresaId
+		select @id _id
+			,e._id empresaId
 			,e.alias empresa
 			,case ISNULL(ue.usuarioId, 0)
 				when 0 then 0
@@ -988,12 +983,10 @@ export const getUserEmpresa = async (req: Request, res: Response) => {
 
 export const removeEmpresa = async (req: Request, res: Response) => {
 	const request = new sql.Request()
-	const params = req.body
-	const user: any = req.headers['user']
-	const empresaId = req.headers['empresa']
+	const params: any = req.query
 
-	request.input('empresa', empresaId)
-	request.input('id', user.id)
+	request.input('empresa', params.empresaId)
+	request.input('id', params.id)
 
 	const query = `
 		delete from USUARIO_EMPRESA where usuarioId = @id and empresaId = @empresa
