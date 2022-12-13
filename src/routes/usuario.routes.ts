@@ -95,3 +95,8 @@ router.get(
 	[validateToken, requestConsume],
 	UsuarioController.getUsuariosAreas
 )
+router.get(
+	'/usuarios/modulo/:modulo',
+	[validateToken, requestConsume],
+	UsuarioController.getUsuariosModuloName
+)
