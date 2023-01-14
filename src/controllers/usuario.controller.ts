@@ -592,6 +592,7 @@ export const getModulo = async (req: Request, res: Response) => {
 		select
 			mu.idmodulo,
 			mu.idusuario,
+			m.url,
 			mu.vista
 		from
 			MODULO_USUARIO mu
@@ -1039,6 +1040,49 @@ export const getUsuariosAreas = async (req: Request, res: Response) => {
 		and u.estado = 1
         and empresaId = @empresa
     `
+
+	try {
+		const result = await request.query(query)
+
+		if (result.recordset.length === 0) {
+			return res.status(204).json({
+				message: 'No se encontraron los datos solicitados',
+				counts: 0,
+				data: [],
+			})
+		}
+
+		return res.status(200).json({
+			message: 'Datos encontrados con exito',
+			counts: result.recordset.length,
+			data: result.recordset,
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al consultar los datos',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
+
+export const getUsuariosModuloName = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params: any = req.params
+	const empresaId = req.headers['empresa']
+
+	request.input('empresa', empresaId)
+	request.input('modulo', params.modulo)
+
+	const query = `
+		select mu.idusuario,
+        dbo.getUserEmail(idusuario) correo
+        from MODULO_USUARIO mu 
+        LEFT JOIN MODULOS m on m.idmodulo = mu.idmodulo
+        where m.nombre = @modulo and mu.empresaId = @empresa
+	`
 
 	try {
 		const result = await request.query(query)
