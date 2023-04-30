@@ -63,11 +63,16 @@ class Divisas {
 	getAll = async (req: Request, res: Response) => {
 		const request = new sql.Request()
 		const params: any = req.body
+		const user: any = req.headers['user']
+		const empresaId = req.headers['empresa']
+
+		request.input('empresa', sql.Int, empresaId)
 
 		const query = `
             select distinct currencycode, 
                 dbo.getValorDivisa(currencycode) valor 
             from GP_DIVISAS
+			where empresaId = @empresa
         `
 
 		try {
