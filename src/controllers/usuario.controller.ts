@@ -1110,3 +1110,43 @@ export const getUsuariosModuloName = async (req: Request, res: Response) => {
 		})
 	}
 }
+
+export const changePassword = async (req: Request, res: Response) => {
+	const request = new sql.Request()
+	const params: any = req.body
+
+	request.input('id', params.id)
+	request.input('pass', generatePass(params.password))
+
+	const query = `
+		update USUARIO
+		set pass = @pass
+		where idusuario = @id
+	`
+
+	try {
+		const result = await request.query(query)
+
+		if (result.rowsAffected[0] === 0) {
+			return res.status(204).json({
+				message: 'Sin datos que modificar',
+				counts: 0,
+				data: params,
+			})
+		}
+
+		return res.status(200).json({
+			message: 'Datos modificados con exito',
+			counts: result.rowsAffected[0],
+			data: [],
+		})
+	} catch (error) {
+		logger.error(error)
+		return res.status(500).json({
+			message: 'Error al modificar los datos',
+			counts: 0,
+			data: params,
+			error,
+		})
+	}
+}
