@@ -100,3 +100,9 @@ router.get(
 	[validateToken, requestConsume],
 	UsuarioController.getUsuariosModuloName
 )
+
+router.put(
+	'/usuarios/change-password',
+	[validateToken, requestConsume],
+	UsuarioController.changePassword
+)
