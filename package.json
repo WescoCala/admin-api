@@ -12,7 +12,7 @@
 	"author": "Sergio Galaz",
 	"license": "ISC",
 	"dependencies": {
-		"bcrypt-nodejs": "0.0.3",
+		"bcrypt": "^5.1.1",
 		"body-parser": "^1.19.0",
 		"cookie-parser": "^1.4.6",
 		"cors": "^2.8.5",
@@ -27,6 +27,7 @@
 		"winston-mongodb": "^5.0.7"
 	},
 	"devDependencies": {
+		"@types/bcrypt": "^5.0.2",
 		"@types/bcrypt-nodejs": "0.0.31",
 		"@types/cookie-parser": "^1.4.2",
 		"@types/cors": "^2.8.12",
